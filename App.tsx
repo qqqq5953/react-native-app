@@ -4,8 +4,10 @@ import {
   QueryClientProvider,
   focusManager,
 } from '@tanstack/react-query'
+import * as React from 'react'
 import { AppStateStatus, Platform } from 'react-native'
 
+// import { AuthProvider } from './src/contexts/AuthContext'
 import { useAppState } from './src/hooks/useAppState'
 import { useOnlineManager } from './src/hooks/useOnlineManager'
 import { AppNavigator } from './src/navigation/AppNavigator'
@@ -37,6 +39,8 @@ export default function App() {
       <NavigationContainer>
         <AppNavigator />
       </NavigationContainer>
+      {/* <AuthProvider>
+      </AuthProvider> */}
     </QueryClientProvider>
   )
 } 
