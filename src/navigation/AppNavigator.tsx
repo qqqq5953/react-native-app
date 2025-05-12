@@ -1,9 +1,9 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 // import useAuth from '../hooks/useAuth';
 import ChatPage from '../screens/ChatPage';
-import ForgetPassword from '../screens/ForgetPassword';
-import Login from '../screens/Login';
-import ResetPassword from '../screens/ResetPassword';
+import ForgetPassword from '../screens/auth/ForgetPassword';
+import Login from '../screens/auth/Login';
+import ResetPassword from '../screens/auth/ResetPassword';
 
 export type RootStackParamList = {
   Login: undefined;

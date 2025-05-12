@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 
 type ForgetPasswordScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ForgetPassword'>;
 
