@@ -1,31 +1,17 @@
-import { useNavigation, useTheme } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
-import { Button, Text, View } from 'react-native';
-import { RootStackParamList } from '../../navigation/AppNavigator';
+import { Link, useTheme } from '@react-navigation/native';
+import { useState } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 // import useAuth from '../hooks/useAuth';
 import Feather from '@expo/vector-icons/Feather';
+import { Checkbox } from 'expo-checkbox';
 import { useColorScheme } from "nativewind";
 import { Controller, useForm } from "react-hook-form";
 import { Input } from '../../components/ui/input';
 import Layout from './components/Layout';
 
-
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
-
 export default function Login() {
-  const navigation = useNavigation<LoginScreenNavigationProp>();
-  // const { login } = useAuth();
   const theme = useTheme();
   console.log('theme', theme);
-
-  const handleLogin = () => {
-    navigation.navigate('ChatPage');
-  };
-
-  const handleForgotPassword = () => {
-    navigation.navigate('ForgetPassword');
-  };
 
   const { colorScheme, toggleColorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark'
@@ -40,7 +26,9 @@ export default function Login() {
       password: "",
     },
   })
-  const onSubmit = (data) => console.log(data)
+
+  const onSubmit = (data: any) => console.log(data)
+  const [isChecked, setChecked] = useState(false);
 
   return (
     <Layout>
@@ -53,50 +41,72 @@ export default function Login() {
         </View>
 
         <View className='flex flex-col gap-6'>
-          <Controller
-            name="email"
-            control={control}
-            rules={{
-              required: true,
-            }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View className="flex-row gap-2 items-center border-b border-navi-border-muted px-2">
-                <Feather name="mail" size={20} color="black" />
-                <Input
-                  placeholder="Email"
-                  className="flex-1 py-4 rounded-none shadow-none border-0
+          <View className='flex flex-col gap-2'>
+            <Controller
+              name="email"
+              control={control}
+              rules={{
+                required: true,
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View className="flex-row gap-2 items-center border-b border-navi-border-muted px-2">
+                  <Feather name="mail" size={20} color="black" />
+                  <Input
+                    placeholder="Email"
+                    keyboardType="email-address"
+                    className="flex-1 py-4 rounded-none shadow-none border-0
                   focus:border-0 placeholder:text-base placeholder:text-navi-text-meeker"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                />
-              </View>
-            )}
-          />
-          {errors.email && <Text className='text-red-500'>Email is required.</Text>}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                </View>
+              )}
+            />
+            {errors.email && <Text className='text-red-500'>Email is required.</Text>}
+          </View>
 
-          <Controller
-            name="password"
-            control={control}
-            rules={{
-              maxLength: 100,
-            }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View className="flex-row gap-2 items-center border-b border-navi-border-muted px-2">
-                <Feather name="lock" size={20} color="black" />
-                <Input
-                  placeholder="Password"
-                  className="flex-1 py-4 rounded-none shadow-none border-0
-                focus:border-0 placeholder:text-base placeholder:text-navi-text-meeker"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                />
-              </View>
-            )}
-          />
+          <View className='flex flex-col gap-2'>
+            <Controller
+              name="password"
+              control={control}
+              rules={{ maxLength: 100, required: true }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View className="flex-row gap-2 items-center border-b border-navi-border-muted px-2">
+                  <Feather name="lock" size={20} color="black" />
+                  <Input
+                    placeholder="Password"
+                    className="flex-1 py-4 rounded-none shadow-none border-0 focus:border-0 placeholder:text-base placeholder:text-navi-text-meeker"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    secureTextEntry
+                  />
+                </View>
+              )}
+            />
+            {errors.password && <Text className='text-red-500'>Password is required.</Text>}
+          </View>
 
-          <Button title="Submit" onPress={handleSubmit(onSubmit)} />
+          <View className='flex-row pb-3'>
+            <View className='flex-row items-center gap-2'>
+              <Checkbox
+                className='border'
+                value={isChecked}
+                onValueChange={setChecked}
+                color={isChecked ? '#4630EB' : undefined}
+              />
+              <Text>Remember me</Text>
+            </View>
+
+            <Link screen="ForgetPassword" params={{}} className='ml-auto underline'>
+              <Text>Forgot password?</Text>
+            </Link>
+          </View>
+
+          <TouchableOpacity onPress={handleSubmit(onSubmit)} className='flex justify-center items-center p-4 rounded-xl bg-indigo-600'>
+            <Text className='text-white text-lg'>Submit</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Layout>
