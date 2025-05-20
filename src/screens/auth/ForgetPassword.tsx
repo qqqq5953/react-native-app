@@ -4,7 +4,7 @@ import { Controller, useForm } from "react-hook-form";
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Input } from '../../components/ui/input';
 import BackToLogin from './components/BackToLogin';
-import Layout from './components/Layout';
+import Layout from './Layout';
 
 export default function ForgetPassword() {
   const linkTo = useLinkTo();

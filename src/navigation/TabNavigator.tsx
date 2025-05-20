@@ -8,9 +8,9 @@ const Tab = createBottomTabNavigator();
 export default function TabNavigator() {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Login" component={Login} />
-      <Tab.Screen name="ForgetPassword" component={ForgetPassword} />
-      <Tab.Screen name="ResetPassword" component={ResetPassword} />
+      <Tab.Screen name="Login" component={Login} options={{ headerShown: false }} />
+      <Tab.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} />
+      <Tab.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} />
     </Tab.Navigator>
   )
 }

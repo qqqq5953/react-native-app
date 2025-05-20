@@ -7,7 +7,7 @@ import { Checkbox } from 'expo-checkbox';
 import { useColorScheme } from "nativewind";
 import { Controller, useForm } from "react-hook-form";
 import { Input } from '../../components/ui/input';
-import Layout from './components/Layout';
+import Layout from './Layout';
 
 export default function Login() {
   const theme = useTheme();

@@ -1,7 +1,9 @@
 import { clsx } from 'clsx';
 import React from 'react';
 import { Image, Keyboard, TouchableWithoutFeedback, View } from 'react-native';
-import PickerLanguage from '../../../components/common/PickerLanguage';
+import PickerLanguage from '../../components/common/PickerLanguage';
+
+
 
 type Props = {
   children: React.ReactNode;
@@ -18,7 +20,7 @@ export default function Layout({ children, containerClassName = "" }: Props) {
             containerClassName
           )}>
             <Image
-              source={require('../../../../assets/images/NAVI-logo-dark.png')}
+              source={require('../../../assets/images/NAVI-logo-dark.png')}
               className='h-12 mb-8 inline-block'
               resizeMode="contain"
             />
