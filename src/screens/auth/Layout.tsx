@@ -16,7 +16,7 @@ export default function Layout({ children, containerClassName = "" }: Props) {
       <View className="flex flex-col min-h-screen bg-navi-surfaceLilac-subtle col-span-1">
         <View className='grow flex justify-center w-full'>
           <View className={clsx(
-            'flex flex-col items-center w-full pb-9 px-9 pt-14',
+            'flex flex-col items-center w-full pb-9 px-8 pt-14',
             containerClassName
           )}>
             <Image

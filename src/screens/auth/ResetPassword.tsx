@@ -1,18 +1,15 @@
 import Feather from '@expo/vector-icons/Feather';
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useLinkTo } from '@react-navigation/native';
 import { useState } from 'react';
 import { Controller, useForm } from "react-hook-form";
 import { Text, TouchableOpacity, View } from 'react-native';
 import { z } from "zod";
 import { Input } from '../../components/ui/input';
-import { RootStackParamList } from '../../navigation/AppNavigator';
 import BackToLogin from './components/BackToLogin';
 import PasswordRequirement from './components/PasswordRequirement';
 import TogglePassword from './components/TogglePassword';
 import Layout from './Layout';
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ResetPassword'>;
 
 const formSchema = z
   .object({
@@ -31,7 +28,7 @@ const formSchema = z
   });
 
 export default function ResetPassword() {
-  const navigation = useNavigation<LoginScreenNavigationProp>();
+  const linkTo = useLinkTo();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -59,7 +56,7 @@ export default function ResetPassword() {
   };
 
   const onSubmit = (data: any) => {
-    navigation.navigate('Login');
+    linkTo('/Login');
     console.log(data)
   }
 
