@@ -10,8 +10,8 @@ import { AppStateStatus, Platform } from 'react-native'
 // import { AuthProvider } from './src/contexts/AuthContext'
 import { useAppState } from './src/hooks/useAppState'
 import { useOnlineManager } from './src/hooks/useOnlineManager'
-import { AppNavigator } from './src/navigation/AppNavigator'
 
+import TabNavigator from '@/navigation/TabNavigator'
 import "./src/global.css"
 
 function onAppStateChange(status: AppStateStatus) {
@@ -37,7 +37,8 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <NavigationContainer>
-        <AppNavigator />
+        {/* <AppNavigator /> */}
+        <TabNavigator />
       </NavigationContainer>
       {/* <AuthProvider>
       </AuthProvider> */}
