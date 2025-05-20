@@ -8,13 +8,17 @@ import { useColorScheme } from "nativewind";
 import { Controller, useForm } from "react-hook-form";
 import { Input } from '../../components/ui/input';
 import Layout from './Layout';
+import TogglePassword from './components/TogglePassword';
 
 export default function Login() {
   const theme = useTheme();
-  console.log('theme', theme);
+  // console.log('theme', theme);
 
   const { colorScheme, toggleColorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark'
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordToggle, setShowPasswordToggle] = useState(false);
 
   const {
     control,
@@ -71,16 +75,27 @@ export default function Login() {
               name="password"
               control={control}
               rules={{ maxLength: 100, required: true }}
-              render={({ field: { onChange, onBlur, value } }) => (
+              render={({ field: { onChange, value } }) => (
                 <View className="flex-row gap-2 items-center border-b border-navi-border-muted px-2">
                   <Feather name="lock" size={20} color="black" />
                   <Input
                     placeholder="Password"
                     className="flex-1 py-4 rounded-none shadow-none border-0 focus:border-0 placeholder:text-base placeholder:text-navi-text-meeker"
-                    onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
-                    secureTextEntry
+                    secureTextEntry={!showPassword}
+                    onFocus={() => {
+                      setShowPasswordToggle(true);
+                    }}
+                    onBlur={() => {
+                      setShowPasswordToggle(false);
+                    }}
+                  />
+                  <TogglePassword
+                    showPassword={showPassword}
+                    setShowPassword={setShowPassword}
+                    showButton={showPasswordToggle}
+                    setShowButton={setShowPasswordToggle}
                   />
                 </View>
               )}
