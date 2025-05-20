@@ -1,71 +1,65 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLinkTo, useRoute } from '@react-navigation/native';
+import { useQueryClient } from '@tanstack/react-query';
 import { ReactNode, useEffect, useState } from 'react';
-import { AuthContext, User } from '../contexts/AuthContext';
 import { useGet, usePost } from '../lib/api';
+import { handleError } from '../lib/helper/error';
+import { AuthContext, User } from './AuthContext';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient()
+  const route = useRoute();
+  const linkTo = useLinkTo();
 
-  const loginMutation = usePost<{ token: string }, { email: string; password: string }>();
+  const loginMutation = usePost<null, { email: string; password: string }>();
+  const loginWithAzureMutation = usePost<null, { code: string; state: string }>();
   const logoutMutation = usePost<null, null>();
   const requestPasswordResetMutation = usePost<null, { email: string }>();
+  const superLinkLoginMutation = usePost<null, { token: string }>();
   const resetPasswordMutation = usePost<null, { newPassword: string, confirmedPassword: string }>();
   const { refetch: getUser } = useGet<User>({
     url: '/user/me',
     queryKey: ['userMe'],
-    options: { enabled: false }
+    options: { enabled: false, retry: false }
   });
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (!token) {
-          setIsLoading(false);
-          return;
-        }
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-        const userResponse = await getUser();
-        setUser(userResponse.data ?? null);
-      } catch (error) {
-        console.log('checkAuth error', error);
-        await AsyncStorage.removeItem('token');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  // Login function
   async function login(email: string, password: string): Promise<void> {
-    const response = await loginMutation.mutateAsync({
+    await loginMutation.mutateAsync({
       url: '/auth/login',
       data: { email, password }
     });
-
-    await AsyncStorage.setItem('token', response.token);
-
-    const userResponse = await getUser();
-    const user = userResponse.data;
-    setUser(user ?? null);
   }
-  // Logout function
+
+  async function loginWithAzure(code: string, state: string): Promise<void> {
+    await loginWithAzureMutation.mutateAsync({
+      url: '/auth/azure/login',
+      data: { code, state }
+    });
+  }
+
   async function logout() {
     await logoutMutation.mutateAsync({
       url: '/auth/logout'
     });
-    await AsyncStorage.removeItem('token');
+    queryClient.removeQueries({ queryKey: ['userMe'] })
     setUser(null);
   }
 
-  // Request password reset function
   async function requestPasswordReset(email: string) {
     await requestPasswordResetMutation.mutateAsync({
       url: '/auth/forget-password',
       data: { email }
+    });
+  }
+
+  async function superLinkLogin(token: string) {
+    await superLinkLoginMutation.mutateAsync({
+      url: `/auth/super-link-login?token=${token}`,
+      config: {
+        maxRedirects: 0 // Prevent automatic redirect following
+      }
     });
   }
 
@@ -79,6 +73,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const publicPaths = [
+        '/login',
+        '/forget-password',
+        '/reset-password',
+        '/super-link-login',
+        '/email-link-expired'
+      ];
+      const isPublicPath = publicPaths.includes(route.name);
+      const isAuthenticated = localStorage.getItem('ia');
+      if (isPublicPath) setIsLoading(isAuthenticated === 'true');
+
+      const { data, error, isError } = await getUser();
+      if (isError) {
+        handleError({
+          error,
+          allDetailTypes: ['password_reset_required'],
+          detailHandlers: {
+            password_reset_required: () => {
+              console.error('Password reset required');
+              linkTo('/ResetPassword');
+            }
+          },
+          nonDetail: {
+            handler: (axiosError) => {
+              const status = axiosError.response?.status;
+              if (status === 403) {
+                console.error('Invalid credential');
+                const pathToSkipRedirect = [
+                  '/forget-password',
+                  '/login',
+                  '/super-link-login'
+                ]
+                const isSkipPath = pathToSkipRedirect.includes(location.pathname);
+                if (isSkipPath) return;
+
+                console.log('403 navigate to login');
+                linkTo('/Login');
+                localStorage.removeItem('ia');
+              }
+            },
+          }
+        });
+        setUser(null);
+        localStorage.removeItem('ia');
+      } else {
+        localStorage.setItem('ia', data ? 'true' : 'false');
+        setUser(data ?? null);
+      }
+
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [route.name]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -87,15 +138,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         login,
         loginMutation,
-        logoutMutation,
+        loginWithAzure,
+        loginWithAzureMutation,
+        requestPasswordReset,
         requestPasswordResetMutation,
+        superLinkLogin,
+        superLinkLoginMutation,
+        resetPassword,
         resetPasswordMutation,
         logout,
-        requestPasswordReset,
-        resetPassword
+        logoutMutation
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-} 
+}

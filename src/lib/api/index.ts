@@ -1,4 +1,4 @@
-import api from "./axios";
+import { ApiErrorResponse } from "@/types/api";
 import {
   UseQueryOptions,
   useMutation,
@@ -6,34 +6,15 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { AxiosError, AxiosRequestConfig } from "axios";
+import api from "./axios";
 
 export { api };
 
-export type ApiErrorResponse = {
-  detail: {
-    type: string;
-    msg: string;
-  };
-};
-
-export type ApiResponse<T> = {
-  data: T;
-};
-
-// Centralized fetcher functions for React Query
 export const fetcher = {
-  // GET request fetcher
   get: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-    try {
-      const response = await api.get(url, config);
-      return response.data;
-    } catch (error) {
-      console.log("fetcher get error", error);
-      return null as unknown as T;
-    }
+    const response = await api.get(url, config);
+    return response.data;
   },
-
-  // POST request fetcher
   post: async <T, D>(
     url: string,
     data?: D,
@@ -42,8 +23,6 @@ export const fetcher = {
     const response = await api.post(url, data, config);
     return response.data;
   },
-
-  // PUT request fetcher
   put: async <T, D>(
     url: string,
     data?: D,
@@ -52,8 +31,6 @@ export const fetcher = {
     const response = await api.put(url, data, config);
     return response.data;
   },
-
-  // DELETE request fetcher
   delete: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
     const response = await api.delete(url, config);
     return response.data;
