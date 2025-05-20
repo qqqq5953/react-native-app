@@ -1,6 +1,7 @@
+import { usePost } from '@/lib/api';
+import { handleError } from '@/lib/helper/error';
 import Feather from '@expo/vector-icons/Feather';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLinkTo } from '@react-navigation/native';
 import { useState } from 'react';
 import { Controller, useForm } from "react-hook-form";
 import { Text, TouchableOpacity, View } from 'react-native';
@@ -9,13 +10,22 @@ import { Input } from '../../components/ui/input';
 import BackToLogin from './components/BackToLogin';
 import CheckEmail from './components/CheckEmail';
 import Layout from './Layout';
+
 const formSchema = z.object({
   email: z.string().email(),
 });
 
 export default function ForgetPassword() {
-  const linkTo = useLinkTo();
   const [email, setEmail] = useState("");
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  const requestPasswordResetMutation = usePost<null, { email: string }>();
+  async function requestPasswordReset(email: string) {
+    await requestPasswordResetMutation.mutateAsync({
+      url: '/auth/forget-password',
+      data: { email }
+    });
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -25,9 +35,22 @@ export default function ForgetPassword() {
     mode: "onChange"
   })
 
-  const onSubmit = ({ email }: z.infer<typeof formSchema>) => {
-    setEmail(email)
-    form.reset()
+  const { isValid, isSubmitting } = form.formState;
+
+  async function onSubmit({ email }: z.infer<typeof formSchema>) {
+    try {
+      await requestPasswordReset(email)
+      setEmail(email)
+      form.reset()
+    } catch (error) {
+      setIsDisabled(true)
+      handleError({
+        error,
+        allDetailTypes: ['invalid_email', 'failed_to_deliver_email'],
+        alreadyHandledDetailTypes: ['invalid_email', 'failed_to_deliver_email'],
+        nonDetail: { message: 'Request password reset failed' },
+      });
+    }
   }
 
   return (
@@ -72,7 +95,11 @@ export default function ForgetPassword() {
                   {form.formState.errors.email && <Text className='text-red-500'>Email is required.</Text>}
                 </View>
 
-                <TouchableOpacity onPress={form.handleSubmit(onSubmit)} className='flex justify-center items-center p-4 rounded-xl bg-indigo-600'>
+                <TouchableOpacity
+                  onPress={form.handleSubmit(onSubmit)}
+                  className='flex justify-center items-center p-4 rounded-xl bg-indigo-600'
+                  disabled={!isValid || isSubmitting || isDisabled}
+                >
                   <Text className='text-white text-lg'>Send email</Text>
                 </TouchableOpacity>
 

@@ -13,7 +13,7 @@ type Props = {
 export default function Layout({ children, containerClassName = "" }: Props) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View className="flex flex-col min-h-screen bg-navi-surfaceLilac-subtle col-span-1">
+      <View className="flex flex-col min-h-screen bg-white col-span-1">
         <View className='grow flex justify-center w-full'>
           <View className={clsx(
             'flex flex-col items-center w-full pb-9 px-8 pt-14',

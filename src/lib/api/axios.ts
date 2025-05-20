@@ -6,7 +6,7 @@ import axios, {
 
 // Create axios instance
 const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api/v1",
+  baseURL: " ",
   headers: {
     "Content-Type": "application/json",
   },
@@ -15,13 +15,12 @@ const api: AxiosInstance = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Get token from localStorage if needed
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
 
-    // Add authorization header if token exists
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // // Add authorization header if token exists
+    // if (token) {
+    //   config.headers.Authorization = `Bearer ${token}`;
+    // }
 
     return config;
   },

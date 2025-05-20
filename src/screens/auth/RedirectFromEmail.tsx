@@ -1,18 +1,27 @@
-import useAuth from "@/hooks/useAuth";
 import { handleError } from "@/lib/helper/error";
 import { useLinkTo } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import { usePost } from "../../lib/api";
 import NotFound from "../NotFound";
 import Layout from "./Layout";
 
 export default function RedirectFromEmail() {
   const linkTo = useLinkTo();
-  const { superLinkLogin } = useAuth();
+  const superLinkLoginMutation = usePost<null, { token: string }>();
   const token = "1234567890";
-  const [isNotFound, setIsNotFound] = useState(false);
 
+  const [isNotFound, setIsNotFound] = useState(false);
   const [isSuperLinkExpired, setIsSuperLinkExpired] = useState(true);
+
+  async function superLinkLogin(token: string) {
+    await superLinkLoginMutation.mutateAsync({
+      url: `/auth/super-link-login?token=${token}`,
+      config: {
+        maxRedirects: 0 // Prevent automatic redirect following
+      }
+    });
+  }
 
   useEffect(() => {
     if (!token) return

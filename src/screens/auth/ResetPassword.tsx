@@ -5,7 +5,10 @@ import { useState } from 'react';
 import { Controller, useForm } from "react-hook-form";
 import { Text, TouchableOpacity, View } from 'react-native';
 import { z } from "zod";
+import { toastify } from '../../components/common/NaviToast';
 import { Input } from '../../components/ui/input';
+import { usePost } from '../../lib/api';
+import { handleError } from '../../lib/helper/error';
 import BackToLogin from './components/BackToLogin';
 import PasswordRequirement from './components/PasswordRequirement';
 import TogglePassword from './components/TogglePassword';
@@ -29,6 +32,7 @@ const formSchema = z
 
 export default function ResetPassword() {
   const linkTo = useLinkTo();
+  const resetPasswordMutation = usePost<null, { newPassword: string, confirmedPassword: string }>();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -55,9 +59,32 @@ export default function ResetPassword() {
     hasValidChars: password.length > 0 ? /^[!-~]+$/.test(password) : false,
   };
 
-  const onSubmit = (data: any) => {
-    linkTo('/Login');
-    console.log(data)
+  async function resetPassword(newPassword: string, confirmedPassword: string) {
+    await resetPasswordMutation.mutateAsync({
+      url: '/auth/reset-password',
+      data: {
+        newPassword,
+        confirmedPassword
+      }
+    });
+  }
+
+  async function onSubmit({ newPassword, confirmedPassword }: z.infer<typeof formSchema>) {
+    try {
+      await resetPassword(newPassword, confirmedPassword);
+      toastify({
+        variant: "success",
+        title: "Password reset successful",
+        description: "Use your new password to login",
+      })
+      linkTo('/Login');
+    } catch (error) {
+      handleError({
+        error,
+        allDetailTypes: ['password_confirm_error'],
+        nonDetail: { message: 'Password reset failed' }
+      });
+    }
   }
 
   return (
