@@ -14,7 +14,7 @@ export default function TogglePassword(props: Props) {
   return (
     <TouchableOpacity
       className={clsx(
-        'absolute right-0 px-4 py-3',
+        'absolute right-0 px-4 py-3 z-20',
         props.showButton ? 'block' : 'hidden',
       )}
       onPress={() => {
@@ -22,8 +22,8 @@ export default function TogglePassword(props: Props) {
       }}
     >
       {props.showPassword
-        ? <Octicons name="eye" size={24} color="black" />
-        : <Octicons name="eye-closed" size={24} color="black" />}
+        ? <Octicons name="eye" size={22} color="#525252" />
+        : <Octicons name="eye-closed" size={22} color="#525252" />}
     </TouchableOpacity>
   )
 }

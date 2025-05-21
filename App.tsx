@@ -17,6 +17,9 @@ import "./src/global.css";
 import api from "./src/lib/api/axios";
 import { handleError } from './src/lib/helper/error';
 
+import './src/global.cssInterop';
+
+
 function onAppStateChange(status: AppStateStatus) {
   // React Query already supports in web browser refetch on window focus by default
   if (Platform.OS !== 'web') {

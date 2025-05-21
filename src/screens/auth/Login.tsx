@@ -6,9 +6,9 @@ import { Checkbox } from 'expo-checkbox';
 import { useColorScheme } from "nativewind";
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from "react-hook-form";
-import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Button, TextInput } from 'react-native-paper';
 import { z } from 'zod';
-import { Input } from '../../components/ui/input';
 import { useGet, usePost } from '../../lib/api';
 import { handleError } from '../../lib/helper/error';
 import TogglePassword from './components/TogglePassword';
@@ -49,21 +49,22 @@ export default function Login() {
   const { isValid, isSubmitting } = form.formState;
 
   async function onLogin({ email, password }: z.infer<typeof formSchema>) {
-    try {
-      await loginMutation.mutateAsync({
-        url: '/auth/login',
-        data: { email, password }
-      });
-      linkTo('/');
-    } catch (error) {
-      setIsDisabled(true);
-      handleError({
-        error,
-        allDetailTypes: ['invalid_credential', 'user_already_logged_in'],
-        alreadyHandledDetailTypes: ['invalid_credential'],
-        nonDetail: { message: 'Login failed' },
-      });
-    }
+    return
+    // try {
+    //   await loginMutation.mutateAsync({
+    //     url: '/auth/login',
+    //     data: { email, password }
+    //   });
+    //   linkTo('/');
+    // } catch (error) {
+    //   setIsDisabled(true);
+    //   handleError({
+    //     error,
+    //     allDetailTypes: ['invalid_credential', 'user_already_logged_in'],
+    //     alreadyHandledDetailTypes: ['invalid_credential'],
+    //     nonDetail: { message: 'Login failed' },
+    //   });
+    // }
   }
 
   async function onRememberMeChange(isChecked: boolean) {
@@ -131,7 +132,7 @@ export default function Login() {
         <View className='pb-7'>
           <Text className='text-center text-navi-text-bold text-4xl pb-4'>Welcome</Text>
           <Text className='text-center text-navi-text-meeker text-sm'>
-            Use your email or another service to login
+            Use your email or another service to login {JSON.stringify(showPassword)}
           </Text>
         </View>
 
@@ -144,13 +145,13 @@ export default function Login() {
                 required: true,
               }}
               render={({ field: { onChange, onBlur, value } }) => (
-                <View className="flex-row gap-2 items-center border-b border-navi-border-muted px-2">
-                  <Feather name="mail" size={20} color="black" />
-                  <Input
-                    placeholder="Email"
+                <View className="relative flex-row gap-2 items-center">
+                  <Feather name="mail" size={20} color="#525252" className='absolute left-4 z-10' />
+                  <TextInput
+                    label="Email"
                     keyboardType="email-address"
-                    className="flex-1 py-4 rounded-none shadow-none border-0
-                  focus:border-0 placeholder:text-base placeholder:text-navi-text-meeker"
+                    className="flex-1 pl-7 text-base bg-transparent"
+                    activeUnderlineColor="#4630EB"
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
@@ -167,19 +168,20 @@ export default function Login() {
               control={form.control}
               rules={{ maxLength: 100, required: true }}
               render={({ field: { onChange, value } }) => (
-                <View className="flex-row gap-2 items-center border-b border-navi-border-muted px-2">
-                  <Feather name="lock" size={20} color="black" />
-                  <Input
-                    placeholder="Password"
-                    className="flex-1 py-4 rounded-none shadow-none border-0 focus:border-0 placeholder:text-base placeholder:text-navi-text-meeker"
+                <View className="relative flex-row gap-2 items-center">
+                  <Feather name="lock" size={22} color="#525252" className='absolute left-4 z-10' />
+                  <TextInput
+                    label="Password"
+                    className="flex-1 pl-7 text-base bg-transparent"
+                    activeUnderlineColor="#4630EB"
                     onChangeText={onChange}
                     value={value}
                     secureTextEntry={!showPassword}
                     onFocus={() => {
-                      setShowPassword(true);
+                      setShowPasswordToggle(true);
                     }}
                     onBlur={() => {
-                      setShowPassword(false);
+                      setShowPasswordToggle(false);
                     }}
                   />
                   <TogglePassword
@@ -195,7 +197,11 @@ export default function Login() {
           </View>
 
           <View className='flex-row pb-3'>
-            <View className='flex-row items-center gap-3'>
+            <TouchableOpacity
+              activeOpacity={1}
+              className='flex-row items-center gap-3'
+              onPress={() => onRememberMeChange(!isRemembeerMe)}
+            >
               <Checkbox
                 className='border'
                 value={isRemembeerMe}
@@ -203,46 +209,52 @@ export default function Login() {
                 color={isRemembeerMe ? '#4630EB' : undefined}
               />
               <Text>Remember me</Text>
-            </View>
-            <Link screen="ForgetPassword" params={{}} className='ml-auto underline' onPress={() => {
-              console.log('loginMutation', JSON.stringify(loginMutation, null, 2));
-
-              // loginMutation.reset()
-            }}>
-              <Text>Forgot password?</Text>
+            </TouchableOpacity>
+            <Link
+              screen="ForgetPassword"
+              params={{}}
+              className='ml-auto underline'
+              onPress={() => {
+                loginMutation.reset()
+                form.reset()
+              }}
+            >
+              <Text className='text-indigo-600'>Forgot password?</Text>
             </Link>
           </View>
 
           <View className='space-y-7'>
-            <TouchableOpacity
+            <Button
+              mode="contained"
               onPress={form.handleSubmit(onLogin)}
-              className='relative flex-row justify-center gap-4 items-center p-4 rounded-xl bg-indigo-600 disabled:opacity-50'
               disabled={!isValid || isSubmitting || isDisabled}
+              buttonColor="#4630EB"
+              className='py-1'
+              loading={isSubmitting}
             >
-              {isSubmitting && <ActivityIndicator size={18} color="white" className='absolute left-[37%]' />}
               <Text className='text-white text-lg'>Login</Text>
-            </TouchableOpacity>
+            </Button>
 
             <View className='relative h-16'>
-              <View className='absolute top-1/2 -translate-y-1/2 w-full h-px bg-black'></View>
-              <Text className='absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-white p-2 text-navi-text-meeker text-sm z-10'>Or Login with</Text>
+              <View className='absolute top-1/2 -translate-y-1/2 w-full h-px bg-neutral-500'></View>
+              <Text className='absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-white p-2 text-neutral-600 text-sm z-10'>Or Login with</Text>
             </View>
 
-            <TouchableOpacity
+            <Button
+              mode="outlined"
               onPress={onLoginWithAzure}
-              className='flex-row gap-4 justify-center items-center p-4 rounded-xl border'
+              className='py-0.5'
+              loading={isAzureLoggingIn}
             >
-              {isAzureLoggingIn
-                ? <ActivityIndicator size={18} color="black" />
-                : <Image
+              <View className='flex-row gap-2.5 items-center'>
+                {!isAzureLoggingIn && <Image
                   source={require('../../../assets/images/azure.png')}
                   className='w-5 h-5'
                   resizeMode="contain"
-                />
-              }
-              <Text>Azure Login</Text>
-            </TouchableOpacity>
-
+                />}
+                <Text className='text-lg'>Azure Login</Text>
+              </View>
+            </Button>
           </View>
         </View>
       </View>
