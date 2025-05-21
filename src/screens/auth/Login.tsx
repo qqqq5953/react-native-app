@@ -1,7 +1,7 @@
 import Feather from '@expo/vector-icons/Feather';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Link, useLinkTo, useRoute, useTheme } from '@react-navigation/native';
+import { Link, useLinkTo, useTheme } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from "react-hook-form";
@@ -118,18 +118,14 @@ export default function Login() {
     }
   }, [code, state]);
 
-  const route = useRoute();
-  // console.log('route', route);
-
-
   useEffect(() => {
-    console.log('useEffect', route);
-
     AsyncStorage.getItem('rememberMe').then((email) => {
+      console.log('email', email);
+
       setRememberedEmail(email ?? '');
       setIsRemembeerMe(!!email);
     });
-  }, [route.path]);
+  }, []);
 
   return (
     <Layout>
@@ -163,9 +159,11 @@ export default function Login() {
                     activeUnderlineColor={form.formState.errors.email ? '#ef4444' : '#4630EB'}
                     underlineColor={form.formState.errors.email ? '#ef4444' : '#525252'}
                     textColor={form.formState.errors.email ? '#ef4444' : '#525252'}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
                     value={value}
+                    onChangeText={onChange}
+                    onBlur={() => {
+                      onRememberMeChange(isRemembeerMe)
+                    }}
                   />
                 </View>
               )}
