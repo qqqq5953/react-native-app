@@ -1,15 +1,16 @@
+import { useLanguageState } from '@/store/languageStore';
 import { Picker } from '@react-native-picker/picker';
-import React, { useState } from 'react';
 import { View } from 'react-native';
 
 export default function PickerLanguage() {
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const { language, setLanguage } = useLanguageState();
+
 
   return (
-    <View className="w-48 border border-gray-300 rounded-lg overflow-hidden">
+    <View className="w-48 rounded-lg overflow-hidden">
       <Picker
-        selectedValue={selectedLanguage}
-        onValueChange={(itemValue) => setSelectedLanguage(itemValue)}
+        selectedValue={language}
+        onValueChange={(itemValue) => setLanguage(itemValue)}
         dropdownIconColor="#000"
         mode="dropdown"
         itemStyle={{

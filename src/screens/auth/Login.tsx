@@ -223,7 +223,7 @@ export default function Login() {
             </Link>
           </View>
 
-          <View className='space-y-7'>
+          <View className='flex-col gap-2'>
             <Button
               mode="contained"
               onPress={form.handleSubmit(onLogin)}
