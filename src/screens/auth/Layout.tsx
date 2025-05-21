@@ -1,9 +1,8 @@
+import PickerLanguage from '@/components/common/LanguageMenu';
 import { clsx } from 'clsx';
 import React from 'react';
 import { Image, Keyboard, TouchableWithoutFeedback, View } from 'react-native';
-import PickerLanguage from '../../components/common/PickerLanguage';
-
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   children: React.ReactNode;
@@ -11,12 +10,14 @@ type Props = {
 }
 
 export default function Layout({ children, containerClassName = "" }: Props) {
+  const insets = useSafeAreaInsets();
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View className="flex flex-col min-h-screen bg-white col-span-1">
-        <View className='grow flex justify-center w-full'>
+      <View className="flex-col min-h-screen bg-white" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+        <View className='grow flex-col w-full pt-10'>
           <View className={clsx(
-            'flex flex-col items-center w-full pb-9 px-8 pt-14',
+            'flex flex-col items-center w-full pb-0 px-8',
             containerClassName
           )}>
             <Image
@@ -28,7 +29,7 @@ export default function Layout({ children, containerClassName = "" }: Props) {
           </View>
         </View>
 
-        <View className='flex items-center justify-center mt-auto py-4'>
+        <View className='mt-auto'>
           <PickerLanguage />
         </View>
       </View>
