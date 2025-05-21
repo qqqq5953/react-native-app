@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
 type LanguageState = {
-  language: string;
-  setLanguage: (language: string) => void;
+  language: { label: string; value: string };
+  setLanguage: (language: { label: string; value: string }) => void;
 };
 
 export const useLanguageState = create<LanguageState>((set) => {
   return {
-    language: "zh-TW",
+    language: { label: "Traditional Chinese", value: "zh-TW" },
     setLanguage: (language) => {
       set(() => ({ language }));
     },

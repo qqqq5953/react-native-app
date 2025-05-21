@@ -13,11 +13,11 @@ import { useOnlineManager } from './src/hooks/useOnlineManager';
 
 import { useUserStore } from '@/store/userStore';
 import { User } from '@/types/user';
+import { PaperProvider } from 'react-native-paper';
 import "./src/global.css";
+import './src/global.cssInterop';
 import api from "./src/lib/api/axios";
 import { handleError } from './src/lib/helper/error';
-
-import './src/global.cssInterop';
 
 
 function onAppStateChange(status: AppStateStatus) {
@@ -97,11 +97,13 @@ export default function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <NavigationContainer onStateChange={onStateChange}>
-        {/* <AppNavigator /> */}
-        <TabNavigator />
-      </NavigationContainer>
-    </QueryClientProvider>
+    <PaperProvider>
+      <QueryClientProvider client={queryClient}>
+        <NavigationContainer onStateChange={onStateChange}>
+          {/* <AppNavigator /> */}
+          <TabNavigator />
+        </NavigationContainer>
+      </QueryClientProvider>
+    </PaperProvider>
   )
 } 
