@@ -1,13 +1,12 @@
 import Feather from '@expo/vector-icons/Feather';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Link, useLinkTo, useTheme } from '@react-navigation/native';
-import { Checkbox } from 'expo-checkbox';
+import { Link, useLinkTo, useRoute, useTheme } from '@react-navigation/native';
 import { useColorScheme } from "nativewind";
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from "react-hook-form";
 import { Image, Text, TouchableOpacity, View } from 'react-native';
-import { Button, TextInput } from 'react-native-paper';
+import { Button, Checkbox, TextInput } from 'react-native-paper';
 import { z } from 'zod';
 import { useGet, usePost } from '../../lib/api';
 import { handleError } from '../../lib/helper/error';
@@ -119,12 +118,18 @@ export default function Login() {
     }
   }, [code, state]);
 
+  const route = useRoute();
+  // console.log('route', route);
+
+
   useEffect(() => {
+    console.log('useEffect', route);
+
     AsyncStorage.getItem('rememberMe').then((email) => {
       setRememberedEmail(email ?? '');
       setIsRemembeerMe(!!email);
     });
-  }, []);
+  }, [route.path]);
 
   return (
     <Layout>
@@ -132,11 +137,11 @@ export default function Login() {
         <View className='pb-7'>
           <Text className='text-center text-navi-text-bold text-4xl pb-4'>Welcome</Text>
           <Text className='text-center text-navi-text-meeker text-sm'>
-            Use your email or another service to login {JSON.stringify(showPassword)}
+            Use your email or another service to login
           </Text>
         </View>
 
-        <View className='flex flex-col gap-6'>
+        <View className='flex flex-col gap-4'>
           <View className='flex flex-col gap-2'>
             <Controller
               name="email"
@@ -146,12 +151,18 @@ export default function Login() {
               }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <View className="relative flex-row gap-2 items-center">
-                  <Feather name="mail" size={20} color="#525252" className='absolute left-4 z-10' />
+                  <Feather name="mail" size={20} color="#525252" className='absolute left-4 z-10 mt-1' />
                   <TextInput
-                    label="Email"
+                    label={
+                      <Text className='text-neutral-500'>
+                        Email
+                      </Text>
+                    }
                     keyboardType="email-address"
-                    className="flex-1 pl-7 text-base bg-transparent"
-                    activeUnderlineColor="#4630EB"
+                    className="flex-1 pl-8 text-base bg-transparent"
+                    activeUnderlineColor={form.formState.errors.email ? '#ef4444' : '#4630EB'}
+                    underlineColor={form.formState.errors.email ? '#ef4444' : '#525252'}
+                    textColor={form.formState.errors.email ? '#ef4444' : '#525252'}
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
@@ -169,11 +180,18 @@ export default function Login() {
               rules={{ maxLength: 100, required: true }}
               render={({ field: { onChange, value } }) => (
                 <View className="relative flex-row gap-2 items-center">
-                  <Feather name="lock" size={22} color="#525252" className='absolute left-4 z-10' />
+                  <Feather name="lock" size={20} color="#525252" className='absolute left-4 z-10' />
                   <TextInput
-                    label="Password"
+                    label={
+                      <Text className='text-neutral-500'>
+                        Password
+                      </Text>
+                    }
                     className="flex-1 pl-7 text-base bg-transparent"
-                    activeUnderlineColor="#4630EB"
+                    selectionColor="blue"
+                    activeUnderlineColor={form.formState.errors.password ? '#ef4444' : '#4630EB'}
+                    underlineColor={form.formState.errors.password ? '#ef4444' : '#525252'}
+                    textColor={form.formState.errors.password ? '#ef4444' : '#525252'}
                     onChangeText={onChange}
                     value={value}
                     secureTextEntry={!showPassword}
@@ -196,17 +214,19 @@ export default function Login() {
             {form.formState.errors.password && <Text className='text-red-500'>Password is required.</Text>}
           </View>
 
-          <View className='flex-row pb-3'>
+          <View className='flex-row'>
             <TouchableOpacity
               activeOpacity={1}
-              className='flex-row items-center gap-3'
+              className='flex-row items-center pl-1.5 h-6'
               onPress={() => onRememberMeChange(!isRemembeerMe)}
             >
               <Checkbox
-                className='border'
-                value={isRemembeerMe}
-                onValueChange={onRememberMeChange}
-                color={isRemembeerMe ? '#4630EB' : undefined}
+                status={isRemembeerMe ? 'checked' : 'unchecked'}
+                onPress={() => {
+                  onRememberMeChange(!isRemembeerMe);
+                }}
+                color='#4630EB'
+                uncheckedColor='#737373'
               />
               <Text>Remember me</Text>
             </TouchableOpacity>
@@ -215,15 +235,21 @@ export default function Login() {
               params={{}}
               className='ml-auto underline'
               onPress={() => {
-                loginMutation.reset()
-                form.reset()
+                loginMutation.reset();
+                form.clearErrors();
+                form.reset({
+                  email: isRemembeerMe
+                    ? (rememberedEmail || form.getValues('email'))
+                    : '',
+                  password: ''
+                });
               }}
             >
               <Text className='text-indigo-600'>Forgot password?</Text>
             </Link>
           </View>
 
-          <View className='flex-col gap-2'>
+          <View className='flex-col gap-2 pb-4 pt-6'>
             <Button
               mode="contained"
               onPress={form.handleSubmit(onLogin)}
@@ -235,7 +261,7 @@ export default function Login() {
               <Text className='text-white text-lg'>Login</Text>
             </Button>
 
-            <View className='relative h-16'>
+            <View className='relative h-12'>
               <View className='absolute top-1/2 -translate-y-1/2 w-full h-px bg-neutral-500'></View>
               <Text className='absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-white p-2 text-neutral-600 text-sm z-10'>Or Login with</Text>
             </View>

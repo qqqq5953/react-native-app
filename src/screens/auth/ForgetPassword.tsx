@@ -4,9 +4,9 @@ import Feather from '@expo/vector-icons/Feather';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { Controller, useForm } from "react-hook-form";
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { Button, TextInput } from 'react-native-paper';
 import { z } from 'zod';
-import { Input } from '../../components/ui/input';
 import BackToLogin from './components/BackToLogin';
 import CheckEmail from './components/CheckEmail';
 import Layout from './Layout';
@@ -66,7 +66,7 @@ export default function ForgetPassword() {
             <View className='w-full'>
               <View className='pb-7'>
                 <Text className='text-center text-navi-text-bold text-4xl pb-4'>Forget Password</Text>
-                <Text className='text-center text-navi-text-meeker text-sm'>
+                <Text className='text-center text-navi-text-meeker text-sm px-4'>
                   Enter your email so that we can send you password reset link
                 </Text>
               </View>
@@ -78,13 +78,19 @@ export default function ForgetPassword() {
                     control={form.control}
                     rules={{ required: true }}
                     render={({ field: { onChange, onBlur, value } }) => (
-                      <View className="flex-row gap-2 items-center border-b border-navi-border-muted px-2">
-                        <Feather name="mail" size={20} color="black" />
-                        <Input
-                          placeholder="Email"
+                      <View className="relative flex-row gap-2 items-center">
+                        <Feather name="mail" size={20} color="#525252" className='absolute left-4 z-10 mt-1' />
+                        <TextInput
+                          label={
+                            <Text className='text-neutral-500'>
+                              Email
+                            </Text>
+                          }
                           keyboardType="email-address"
-                          className="flex-1 py-4 rounded-none shadow-none border-0
-                  focus:border-0 placeholder:text-base placeholder:text-navi-text-meeker"
+                          className="flex-1 pl-8 text-base bg-transparent"
+                          activeUnderlineColor={form.formState.errors.email ? '#ef4444' : '#4630EB'}
+                          underlineColor={form.formState.errors.email ? '#ef4444' : '#525252'}
+                          textColor={form.formState.errors.email ? '#ef4444' : '#525252'}
                           onBlur={onBlur}
                           onChangeText={onChange}
                           value={value}
@@ -92,18 +98,25 @@ export default function ForgetPassword() {
                       </View>
                     )}
                   />
-                  {form.formState.errors.email && <Text className='text-red-500'>Email is required.</Text>}
+                  {form.formState.errors.email && <Text className='text-red-500'>{form.formState.errors.email.message}</Text>}
                 </View>
 
-                <TouchableOpacity
+                <Button
+                  mode="contained"
                   onPress={form.handleSubmit(onSubmit)}
-                  className='flex justify-center items-center p-4 rounded-xl bg-indigo-600'
                   disabled={!isValid || isSubmitting || isDisabled}
+                  buttonColor="#4630EB"
+                  className='py-1'
+                  loading={isSubmitting}
                 >
                   <Text className='text-white text-lg'>Send email</Text>
-                </TouchableOpacity>
+                </Button>
 
-                <BackToLogin />
+                <BackToLogin onPress={() => {
+                  requestPasswordResetMutation.reset();
+                  form.clearErrors();
+                  form.reset();
+                }} />
               </View>
             </View>
           </Layout>
