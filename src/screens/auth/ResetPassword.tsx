@@ -1,12 +1,12 @@
 import Feather from '@expo/vector-icons/Feather';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLinkTo } from '@react-navigation/native';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from "react-hook-form";
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Text, View } from 'react-native';
+import { Button, TextInput } from 'react-native-paper';
 import { z } from "zod";
 import { toastify } from '../../components/common/NaviToast';
-import { Input } from '../../components/ui/input';
 import { usePost } from '../../lib/api';
 import { handleError } from '../../lib/helper/error';
 import BackToLogin from './components/BackToLogin';
@@ -87,13 +87,30 @@ export default function ResetPassword() {
     }
   }
 
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: shouldShowRequirements ? 1 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.timing(translateY, {
+      toValue: shouldShowRequirements ? 8 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [shouldShowRequirements]);
+
   return (
     <Layout>
       <View className='w-full'>
         <View className='pb-7'>
           <Text className='text-center text-navi-text-bold text-4xl pb-4'>Reset Password</Text>
           <Text className='text-center text-navi-text-meeker text-sm mx-10'>
-            Enter a new password below to change your password. {password} / {JSON.stringify(passwordValidation.hasNumber)}
+            Enter a new password below to change your password.
           </Text>
         </View>
 
@@ -103,14 +120,20 @@ export default function ResetPassword() {
               name="newPassword"
               control={form.control}
               render={({ field }) => (
-                <View className="relative flex-row gap-2 items-center border-b border-navi-border-muted px-2">
-                  <Feather name="lock" size={20} color="black" />
-                  <Input
-                    placeholder="New Password"
-                    className="flex-1 py-4 rounded-none shadow-none border-0
-                  focus:border-0 placeholder:text-base placeholder:text-navi-text-meeker"
-                    value={field.value}
+                <View className="relative flex-row gap-2 items-center">
+                  <Feather name="lock" size={20} color="#525252" className='absolute left-4 z-10' />
+                  <TextInput
+                    label={
+                      <Text className='text-neutral-500'>
+                        New Password
+                      </Text>
+                    }
+                    className="flex-1 pl-7 text-base bg-transparent"
+                    activeUnderlineColor={form.formState.errors.newPassword ? '#525252' : '#4630EB'}
+                    underlineColor={form.formState.errors.newPassword ? '#525252' : '#525252'}
+                    textColor={form.formState.errors.newPassword ? '#525252' : '#525252'}
                     secureTextEntry={!showPassword}
+                    value={field.value}
                     onChangeText={(e) => {
                       field.onChange(e);
                       const newPassword = form.getValues('newPassword');
@@ -139,13 +162,20 @@ export default function ResetPassword() {
                 </View>
               )}
             />
-            <View
-              className={`flex flex-col gap-1 ${shouldShowRequirements ? 'opacity-100 translate-y-2' : 'opacity-0 translate-y-0 h-0'}`}
-            >
-              <PasswordRequirement text="Only contain letters, numbers and symbols" isValid={passwordValidation.hasValidChars} />
-              <PasswordRequirement text="At least one number" isValid={passwordValidation.hasNumber} />
-              <PasswordRequirement text="6-18 characters" isValid={passwordValidation.length} />
-              <PasswordRequirement text="Includes both lower and upper case letters" isValid={passwordValidation.hasLowercase && passwordValidation.hasUppercase} />
+            <View className={`${shouldShowRequirements ? 'h-auto' : 'h-0'}`}>
+              <Animated.View
+                style={{
+                  opacity,
+                  transform: [{ translateY }],
+                }}
+                className="flex flex-col gap-1"
+              >
+                <PasswordRequirement text="Only contain letters, numbers and symbols" isValid={passwordValidation.hasValidChars} />
+                <PasswordRequirement text="At least one number" isValid={passwordValidation.hasNumber} />
+                <PasswordRequirement text="6-18 characters" isValid={passwordValidation.length} />
+                <PasswordRequirement text="Includes both lower and upper case letters" isValid={passwordValidation.hasLowercase && passwordValidation.hasUppercase} />
+
+              </Animated.View>
             </View>
           </View>
 
@@ -155,14 +185,20 @@ export default function ResetPassword() {
               control={form.control}
               rules={{ required: true }}
               render={({ field }) => (
-                <View className="flex-row gap-2 items-center border-b border-navi-border-muted px-2">
-                  <Feather name="lock" size={20} color="black" />
-                  <Input
-                    placeholder="Confirm New Password"
-                    className="flex-1 py-4 rounded-none shadow-none border-0
-                  focus:border-0 placeholder:text-base placeholder:text-navi-text-meeker"
-                    value={field.value}
+                <View className="flex-row gap-2 items-center">
+                  <Feather name="lock" size={20} color="#525252" className='absolute left-4 z-10' />
+                  <TextInput
+                    label={
+                      <Text className='text-neutral-500'>
+                        Confirm New Password
+                      </Text>
+                    }
+                    className="flex-1 pl-7 text-base bg-transparent"
+                    activeUnderlineColor={form.formState.errors.confirmedPassword ? '#ef4444' : '#4630EB'}
+                    underlineColor={form.formState.errors.confirmedPassword ? '#ef4444' : '#525252'}
+                    textColor={form.formState.errors.confirmedPassword ? '#ef4444' : '#525252'}
                     secureTextEntry={!showConfirmPassword}
+                    value={field.value}
                     onChangeText={(e) => {
                       field.onChange(e);
                       if (form.getValues('newPassword') === form.getValues('confirmedPassword')) {
@@ -188,13 +224,16 @@ export default function ResetPassword() {
             {form.formState.errors.confirmedPassword && <Text className='text-red-500'>Passwords do not match</Text>}
           </View>
 
-          <TouchableOpacity
+          <Button
+            mode="contained"
             onPress={form.handleSubmit(onSubmit)}
-            className='flex justify-center items-center p-4 rounded-xl bg-indigo-600 disabled:opacity-85'
             disabled={!isValid || isSubmitting}
+            buttonColor="#4630EB"
+            className='py-1'
+            loading={isSubmitting}
           >
             <Text className='text-white text-lg'>Reset password</Text>
-          </TouchableOpacity>
+          </Button>
           <BackToLogin />
         </View>
       </View>

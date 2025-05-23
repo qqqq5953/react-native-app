@@ -120,8 +120,6 @@ export default function Login() {
 
   useEffect(() => {
     AsyncStorage.getItem('rememberMe').then((email) => {
-      console.log('email', email);
-
       setRememberedEmail(email ?? '');
       setIsRemembeerMe(!!email);
     });
@@ -168,7 +166,7 @@ export default function Login() {
                 </View>
               )}
             />
-            {form.formState.errors.email && <Text className='text-red-500'>Email is required.</Text>}
+            {form.formState.errors.email && <Text className='text-red-500'>{form.formState.errors.email.message}</Text>}
           </View>
 
           <View className='flex flex-col gap-2'>
@@ -186,7 +184,6 @@ export default function Login() {
                       </Text>
                     }
                     className="flex-1 pl-7 text-base bg-transparent"
-                    selectionColor="blue"
                     activeUnderlineColor={form.formState.errors.password ? '#ef4444' : '#4630EB'}
                     underlineColor={form.formState.errors.password ? '#ef4444' : '#525252'}
                     textColor={form.formState.errors.password ? '#ef4444' : '#525252'}
@@ -209,7 +206,7 @@ export default function Login() {
                 </View>
               )}
             />
-            {form.formState.errors.password && <Text className='text-red-500'>Password is required.</Text>}
+            {form.formState.errors.password && <Text className='text-red-500'>{form.formState.errors.password.message}</Text>}
           </View>
 
           <View className='flex-row'>
