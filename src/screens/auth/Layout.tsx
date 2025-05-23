@@ -4,6 +4,8 @@ import React from 'react';
 import { Image, Keyboard, TouchableWithoutFeedback, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import NaviSnackbar from '@/components/common/NaviSnackbar';
+
 type Props = {
   children: React.ReactNode;
   containerClassName?: string;
@@ -14,8 +16,8 @@ export default function Layout({ children, containerClassName = "" }: Props) {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View className="flex-col min-h-screen bg-white" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
-        <View className='grow flex-col w-full pt-10'>
+      <View className="flex-1 bg-white" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+        <View className='grow flex-col w-full pt-12'>
           <View className={clsx(
             'flex flex-col items-center w-full pb-0 px-8',
             containerClassName
@@ -32,6 +34,8 @@ export default function Layout({ children, containerClassName = "" }: Props) {
         <View className='mt-auto'>
           <PickerLanguage />
         </View>
+
+        <NaviSnackbar />
       </View>
     </TouchableWithoutFeedback>
   )

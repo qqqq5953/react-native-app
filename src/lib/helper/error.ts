@@ -1,9 +1,7 @@
 import { AxiosError } from "axios";
-import {
-  toastify,
-  toastifyUnexpectedError,
-} from "../../components/common/NaviToast";
 import { ApiErrorResponse } from "../../types/api";
+
+import { useSnackbarStore } from "@/store/snackbarStore";
 
 export type DetailErrorHandler = (
   detail: { type: string; msg: string },
@@ -65,6 +63,8 @@ export const DETAIL_TYPE = {
   409: [ERROR_TYPE.USER_ALREADY_LOGGED_IN],
 } as const;
 
+const setSnackbar = useSnackbarStore.getState().setSnackbar;
+
 export function handleError({
   error,
   isError = true,
@@ -88,7 +88,11 @@ export function handleError({
     const status = error.response?.status;
 
     if (status === 422) {
-      toastifyUnexpectedError(`${status}: ${error.message}`);
+      setSnackbar({
+        visible: true,
+        variant: "error",
+        title: `${status}: ${error.message}`,
+      });
       return;
     }
 
@@ -103,11 +107,19 @@ export function handleError({
     if ("handler" in nonAxios && nonAxios.handler) {
       nonAxios.handler(error);
     } else if ("message" in nonAxios && nonAxios.message) {
-      toastifyUnexpectedError(nonAxios.message);
+      setSnackbar({
+        visible: true,
+        variant: "error",
+        title: nonAxios.message,
+      });
     }
   } else {
     // For non-Axios errors with no specific handler
-    toastifyUnexpectedError(getErrorMessage(error));
+    setSnackbar({
+      visible: true,
+      variant: "error",
+      title: getErrorMessage(error),
+    });
   }
 }
 
@@ -133,13 +145,15 @@ function handleAxiosError({
       if (detailHandlers?.[detailType]) {
         detailHandlers[detailType](detail, error);
       } else if (!alreadyHandledDetailTypes.includes(detailType)) {
-        toastify({
+        setSnackbar({
+          visible: true,
           variant: "error",
           title: detail.msg,
         });
       }
     } else {
-      toastify({
+      setSnackbar({
+        visible: true,
         variant: "error",
         title: detail.msg,
       });
@@ -149,10 +163,18 @@ function handleAxiosError({
     if ("handler" in nonDetail && nonDetail.handler) {
       nonDetail.handler(error);
     } else if ("message" in nonDetail && nonDetail.message) {
-      toastifyUnexpectedError(nonDetail.message);
+      setSnackbar({
+        visible: true,
+        variant: "error",
+        title: nonDetail.message,
+      });
     }
   } else {
-    toastifyUnexpectedError(error.message);
+    setSnackbar({
+      visible: true,
+      variant: "error",
+      title: error.message,
+    });
   }
 }
 

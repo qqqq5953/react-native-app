@@ -1,4 +1,5 @@
 import TabNavigator from '@/navigation/TabNavigator';
+// import { AppNavigator } from '@/navigation/AppNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, NavigationState } from '@react-navigation/native';
 import {

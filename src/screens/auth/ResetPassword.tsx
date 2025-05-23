@@ -1,3 +1,4 @@
+import { useSnackbarStore } from '@/store/snackbarStore';
 import Feather from '@expo/vector-icons/Feather';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLinkTo } from '@react-navigation/native';
@@ -6,7 +7,6 @@ import { Controller, useForm } from "react-hook-form";
 import { Animated, Text, View } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { z } from "zod";
-import { toastify } from '../../components/common/NaviToast';
 import { usePost } from '../../lib/api';
 import { handleError } from '../../lib/helper/error';
 import BackToLogin from './components/BackToLogin';
@@ -32,6 +32,8 @@ const formSchema = z
 
 export default function ResetPassword() {
   const linkTo = useLinkTo();
+  const { setSnackbar } = useSnackbarStore();
+
   const resetPasswordMutation = usePost<null, { newPassword: string, confirmedPassword: string }>();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -72,10 +74,11 @@ export default function ResetPassword() {
   async function onSubmit({ newPassword, confirmedPassword }: z.infer<typeof formSchema>) {
     try {
       await resetPassword(newPassword, confirmedPassword);
-      toastify({
+      setSnackbar({
+        visible: true,
         variant: "success",
         title: "Password reset successful",
-        description: "Use your new password to login",
+        message: "Use your new password to login",
       })
       linkTo('/Login');
     } catch (error) {
