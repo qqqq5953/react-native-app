@@ -42,6 +42,7 @@
     "react-dom": "19.0.0",
     "react-hook-form": "^7.56.3",
     "react-native": "0.79.2",
+    "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-paper": "^5.14.5",
     "react-native-reanimated": "3.16.2",
@@ -59,6 +60,9 @@
     "babel-plugin-module-resolver": "^5.0.2",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
+    "fast-text-encoding": "^1.0.6",
+    "msw": "^2.8.4",
+    "react-native-url-polyfill": "^2.0.0",
     "typescript": "~5.8.3"
   },
   "private": true
