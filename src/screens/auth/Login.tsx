@@ -1,3 +1,4 @@
+import ErrorMessage from '@/components/common/ErrorMessage';
 import Feather from '@expo/vector-icons/Feather';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -48,22 +49,26 @@ export default function Login() {
   const { isValid, isSubmitting } = form.formState;
 
   async function onLogin({ email, password }: z.infer<typeof formSchema>) {
-    return
-    // try {
-    //   await loginMutation.mutateAsync({
-    //     url: '/auth/login',
-    //     data: { email, password }
-    //   });
-    //   linkTo('/');
-    // } catch (error) {
-    //   setIsDisabled(true);
-    //   handleError({
-    //     error,
-    //     allDetailTypes: ['invalid_credential', 'user_already_logged_in'],
-    //     alreadyHandledDetailTypes: ['invalid_credential'],
-    //     nonDetail: { message: 'Login failed' },
-    //   });
-    // }
+    // return
+    try {
+      await loginMutation.mutateAsync({
+        url: '/auth/login',
+        data: { email, password }
+      });
+
+      linkTo('/Home');
+      setIsDisabled(false);
+    } catch (error) {
+      console.log('login error', error);
+
+      setIsDisabled(true);
+      handleError({
+        error,
+        allDetailTypes: ['invalid_credential', 'user_already_logged_in'],
+        alreadyHandledDetailTypes: ['invalid_credential'],
+        nonDetail: { message: 'Login failed' },
+      });
+    }
   }
 
   async function onRememberMeChange(isChecked: boolean) {
@@ -135,6 +140,8 @@ export default function Login() {
           </Text>
         </View>
 
+        <ErrorMessage mutation={loginMutation} useAlert={true} />
+
         <View className='flex flex-col gap-4'>
           <View className='flex flex-col gap-2'>
             <Controller
@@ -143,7 +150,7 @@ export default function Login() {
               rules={{
                 required: true,
               }}
-              render={({ field: { onChange, onBlur, value } }) => (
+              render={({ field }) => (
                 <View className="relative flex-row gap-2 items-center">
                   <Feather name="mail" size={20} color="#525252" className='absolute left-4 z-10 mt-1' />
                   <TextInput
@@ -157,8 +164,12 @@ export default function Login() {
                     activeUnderlineColor={form.formState.errors.email ? '#ef4444' : '#4630EB'}
                     underlineColor={form.formState.errors.email ? '#ef4444' : '#525252'}
                     textColor={form.formState.errors.email ? '#ef4444' : '#525252'}
-                    value={value}
-                    onChangeText={onChange}
+                    value={field.value}
+                    onChangeText={(e) => {
+                      field.onChange(e)
+                      setIsDisabled(false)
+                      loginMutation.reset()
+                    }}
                     onBlur={() => {
                       onRememberMeChange(isRemembeerMe)
                     }}
@@ -174,7 +185,7 @@ export default function Login() {
               name="password"
               control={form.control}
               rules={{ maxLength: 100, required: true }}
-              render={({ field: { onChange, value } }) => (
+              render={({ field }) => (
                 <View className="relative flex-row gap-2 items-center">
                   <Feather name="lock" size={20} color="#525252" className='absolute left-4 z-10' />
                   <TextInput
@@ -187,9 +198,13 @@ export default function Login() {
                     activeUnderlineColor={form.formState.errors.password ? '#ef4444' : '#4630EB'}
                     underlineColor={form.formState.errors.password ? '#ef4444' : '#525252'}
                     textColor={form.formState.errors.password ? '#ef4444' : '#525252'}
-                    onChangeText={onChange}
-                    value={value}
                     secureTextEntry={!showPassword}
+                    value={field.value}
+                    onChangeText={(e) => {
+                      field.onChange(e)
+                      setIsDisabled(false)
+                      loginMutation.reset()
+                    }}
                     onFocus={() => {
                       setShowPasswordToggle(true);
                     }}

@@ -6,7 +6,7 @@ import axios, {
 
 // Create axios instance
 const api: AxiosInstance = axios.create({
-  baseURL: " ",
+  baseURL: "http://localhost",
   headers: {
     "Content-Type": "application/json",
   },
@@ -21,6 +21,7 @@ api.interceptors.request.use(
     // if (token) {
     //   config.headers.Authorization = `Bearer ${token}`;
     // }
+    // console.log("config", config);
 
     return config;
   },

@@ -1,3 +1,4 @@
+import ErrorMessage from '@/components/common/ErrorMessage';
 import { usePost } from '@/lib/api';
 import { handleError } from '@/lib/helper/error';
 import Feather from '@expo/vector-icons/Feather';
@@ -36,6 +37,7 @@ export default function ForgetPassword() {
   })
 
   const { isValid, isSubmitting } = form.formState;
+  const isError = !!form.formState.errors.email || requestPasswordResetMutation.isError
 
   async function onSubmit({ email }: z.infer<typeof formSchema>) {
     try {
@@ -77,7 +79,7 @@ export default function ForgetPassword() {
                     name="email"
                     control={form.control}
                     rules={{ required: true }}
-                    render={({ field: { onChange, onBlur, value } }) => (
+                    render={({ field }) => (
                       <View className="relative flex-row gap-2 items-center">
                         <Feather name="mail" size={20} color="#525252" className='absolute left-4 z-10 mt-1' />
                         <TextInput
@@ -88,17 +90,22 @@ export default function ForgetPassword() {
                           }
                           keyboardType="email-address"
                           className="flex-1 pl-8 text-base bg-transparent"
-                          activeUnderlineColor={form.formState.errors.email ? '#ef4444' : '#4630EB'}
-                          underlineColor={form.formState.errors.email ? '#ef4444' : '#525252'}
-                          textColor={form.formState.errors.email ? '#ef4444' : '#525252'}
-                          onBlur={onBlur}
-                          onChangeText={onChange}
-                          value={value}
+                          activeUnderlineColor={isError ? '#ef4444' : '#4630EB'}
+                          underlineColor={isError ? '#ef4444' : '#525252'}
+                          textColor={isError ? '#ef4444' : '#525252'}
+                          value={field.value}
+                          onBlur={field.onBlur}
+                          onChangeText={(e) => {
+                            field.onChange(e);
+                            setIsDisabled(false)
+                            requestPasswordResetMutation.reset()
+                          }}
                         />
                       </View>
                     )}
                   />
                   {form.formState.errors.email && <Text className='text-red-500'>{form.formState.errors.email.message}</Text>}
+                  <ErrorMessage mutation={requestPasswordResetMutation} />
                 </View>
 
                 <Button
@@ -107,6 +114,7 @@ export default function ForgetPassword() {
                   disabled={!isValid || isSubmitting || isDisabled}
                   buttonColor="#4630EB"
                   className='py-1'
+                  labelStyle={{ width: '100%' }}
                   loading={isSubmitting}
                 >
                   <Text className='text-white text-lg'>Send email</Text>

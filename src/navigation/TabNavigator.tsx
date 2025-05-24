@@ -1,3 +1,4 @@
+import Home from '@/screens/Home';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ForgetPassword from '../screens/auth/ForgetPassword';
 import Login from '../screens/auth/Login';
@@ -11,6 +12,7 @@ export default function TabNavigator() {
       <Tab.Screen name="Login" component={Login} options={{ headerShown: false }} />
       <Tab.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} />
       <Tab.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} />
+      <Tab.Screen name="Home" component={Home} options={{ headerShown: false }} />
     </Tab.Navigator>
   )
 }

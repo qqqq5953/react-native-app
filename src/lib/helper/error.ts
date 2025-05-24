@@ -1,11 +1,11 @@
-import { AxiosError } from "axios";
-import { ApiErrorResponse } from "../../types/api";
-
 import { useSnackbarStore } from "@/store/snackbarStore";
+import { AxiosError } from "axios";
+import { ApiErrorResponse, FetchErrorResponse } from "../../types/api";
+import { FetchError } from "../api";
 
 export type DetailErrorHandler = (
   detail: { type: string; msg: string },
-  error: AxiosError<ApiErrorResponse>
+  error: AxiosError<ApiErrorResponse> | FetchErrorResponse
 ) => void;
 
 // Flattened structure - use detail type directly as key
@@ -15,7 +15,8 @@ export type DetailErrorHandlers = {
 
 export type NonAxiosErrorHandler = (error: unknown) => void;
 export type NonDetailErrorHandler = (
-  error: AxiosError<ApiErrorResponse>
+  status: number | undefined
+  // error: AxiosError<ApiErrorResponse> | FetchErrorResponse
 ) => void;
 
 // Helper type for creating an exclusive-or type
@@ -82,10 +83,12 @@ export function handleError({
   nonDetail?: NonDetailOption;
   nonAxios?: NonAxiosOption;
 }): void {
+  console.log("error", JSON.stringify(error, null, 2));
+
   if (!isError) return;
 
-  if (isAxiosError(error)) {
-    const status = error.response?.status;
+  if (isAxiosError(error) || isFetchError(error)) {
+    const status = isAxiosError(error) ? error.response?.status : error.status;
 
     if (status === 422) {
       setSnackbar({
@@ -98,6 +101,7 @@ export function handleError({
 
     handleAxiosError({
       error,
+      detail: getDetail(error),
       allDetailTypes,
       alreadyHandledDetailTypes,
       detailHandlers,
@@ -125,19 +129,25 @@ export function handleError({
 
 function handleAxiosError({
   error,
+  detail,
   allDetailTypes,
   alreadyHandledDetailTypes = [],
   detailHandlers,
   nonDetail,
 }: {
-  error: AxiosError<ApiErrorResponse>;
+  error: AxiosError<ApiErrorResponse> | FetchErrorResponse;
+  detail:
+    | string
+    | {
+        type: DetailType;
+        msg: string;
+      }
+    | undefined;
   allDetailTypes: DetailType[];
   alreadyHandledDetailTypes?: DetailType[];
   detailHandlers?: DetailErrorHandlers;
   nonDetail?: NonDetailOption;
 }) {
-  const detail = error.response?.data.detail;
-
   if (isErrorDetail(detail)) {
     const detailType = detail.type;
 
@@ -161,7 +171,10 @@ function handleAxiosError({
   } else if (nonDetail) {
     // Handle unhandled primitive error with {detail:XXX} thrown by python
     if ("handler" in nonDetail && nonDetail.handler) {
-      nonDetail.handler(error);
+      const status = isAxiosError(error)
+        ? error.response?.status
+        : error.status;
+      nonDetail.handler(status);
     } else if ("message" in nonDetail && nonDetail.message) {
       setSnackbar({
         visible: true,
@@ -184,6 +197,28 @@ export function isAxiosError(
   return error instanceof AxiosError;
 }
 
+export function isFetchError(error: any): error is {
+  body: FetchErrorResponse["body"];
+  status: number;
+  message: string;
+} {
+  return (
+    error && typeof error === "object" && "body" in error && "status" in error
+  );
+}
+
+export function getDetail(
+  error:
+    | AxiosError<ApiErrorResponse>
+    | {
+        body: FetchErrorResponse["body"];
+        status: number;
+        message: string;
+      }
+) {
+  return isAxiosError(error) ? error.response?.data.detail : error.body?.detail;
+}
+
 export function isErrorDetail(
   detail: unknown
 ): detail is { type: string; msg: string } {
@@ -202,6 +237,10 @@ export function getErrorMessage(error: unknown): string {
       return detail.msg;
     }
     return error.message;
+  }
+
+  if (error instanceof FetchError) {
+    return error.body.detail.msg;
   }
 
   if (error instanceof Error) {
